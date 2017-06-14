@@ -228,22 +228,64 @@ def gridIt(clf, params):
 #######################################
 # t-SNE cluster projection exploration
 
+All_under = X_all.copy(deep=True)
+All_under['passed'] = y_all
+
+All_under = All_under[All_under['age'] < 19]
+
+X_under, y_under = All_under[All_under.columns[:-1]], All_under[All_under.columns[-1]]
+
+print X_all.shape, All_under.shape, y_all.shape
+print X_under.shape, y_under.shape
 # Scaling features to the same range (0-1)
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
-uX_all = scaler.fit_transform(X_all[X_all.columns])
+
+uX_all = scaler.fit_transform(X_all)
+# uX_all = scaler.fit_transform(X_under)
 
 from sklearn.manifold import TSNE
-model = TSNE(n_components=2, random_state=0, method='exact')
+model = TSNE(n_components=2,
+             early_exaggeration=4.0,
+             learning_rate=1000,
+             n_iter=1000,
+             init='pca',
+             random_state=0,
+             method='exact')
 # np.set_printoptions(suppress=True)
 clusters = model.fit_transform(uX_all)
 
-colors = 
-area = np.pi * (15 * np.random.rand(N))**2  # 0 to 15 point radii
+for age in range(15, 21,2):
+    lower, upper = age, age+2
+    
+    x_fail, y_fail = zip(*[ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'no' and
+                        
+                            X_all['age'][i] >= lower and X_all['age'][i] < upper ])
 
-plt.scatter(x, y, s=area, c=colors, alpha=0.5)
-plt.show()
+    x_pass, y_pass = zip(*[ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'yes' and
+                        
+                            X_all['age'][i] >= lower and X_all['age'][i] < upper ])
+    print len(x_pass)+len(x_fail)
+    plt.scatter(x_fail, y_fail, s=50, c='red', alpha=0.5, label="student failed")
+    plt.scatter(x_pass, y_pass, s=50, c='blue', alpha=0.5, label="student passed")
+    plt.show()
 
+### For a 3D scatter plot
+# from mpl_toolkits.mplot3d import Axes3D
+# x_fail, y_fail, z_fail = zip(* [ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'no'])
+# x_pass, y_pass, z_pass = zip(* [ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'yes'])
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+
+# ax.scatter(x_fail, y_fail, z_fail, s=50, c='red', alpha=0.5, label="student failed")
+# ax.scatter(x_pass, y_pass, z_pass, s=50, c='blue', alpha=0.5, label="student passed")
+# plt.show()
+
+
+
+# colors = np.random.rand(N)
+# area = np.pi * (15 * np.random.rand(N))**2  # 0 to 15 point radii
 
 
 
