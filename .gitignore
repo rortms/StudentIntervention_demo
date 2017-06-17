@@ -1,2 +1,11 @@
 ## Ignore checkpoints
 .ipynb_checkpoints
+
+## minted files for pretty org-mode pdf export
+_minted-student_intervention_revisit
+
+## pdf conversion log and intermediate files
+*.aux
+*.log
+*.out
+*.tex
