@@ -46,11 +46,50 @@ each feature:
   - health - current health status (numeric: from 1 - very bad to 5 - very good)
   - absences - number of school absences (numeric: from 0 to 93)
   - passed - did the student pass the final exam (binary: yes or no)
-** Reading the Data
-   #+BEGIN_SRC python session: data_wrangle
-        # Import libraries
-        import numpy as np
-        import pandas as pd
-        import matplotlib.pyplot as plt
+
+** Load the data
+*** Imports
+    The following python libraries are used in this analysis.
+    #+BEGIN_SRC python :results output :session wrangle_data 
+      import numpy as np
+      import pandas as pd
+      import matplotlib.pyplot as plt
+      from tabulate import tabulate
    #+END_SRC
+
+*** Pre-process
+    Lets first observe what the graduation rate is for the class;
+
+    #+BEGIN_SRC python  :session wrangle_data 
+      student_data = pd.read_csv("student-data.csv")
+
+      n_students = student_data.shape[0]
+      n_features = student_data.shape[1] - 1
+      n_passed = sum([1 for y in student_data['passed'] if y == 'yes'])
+      n_failed = sum([1 for n in student_data['passed'] if n == 'no'])
+      grad_rate = 100.*n_passed/(n_passed + n_failed)
+
+
+      tabulate( [["Total number of students: ",n_students],
+                 ["Number of students who passed: ",n_passed],
+                 ["Number of students who failed: ",n_failed],
+                 ["Number of features: ",n_features],
+                 ["Graduation rate of the class:",  "{:.2f}%".format(grad_rate)]], tablefmt="grid")
+
+    #+END_SRC
+
+    This gives us the following figures;
+
+   +--------------------------------+--------+
+   | Total number of students:      | 395    |
+   +--------------------------------+--------+
+   | Number of students who passed: | 265    |
+   +--------------------------------+--------+
+   | Number of students who failed: | 130    |
+   +--------------------------------+--------+
+   | Number of features:            | 30     |
+   +--------------------------------+--------+
+   | Graduation rate of the class:  | 67.09% |
+   +--------------------------------+--------+
+
 
