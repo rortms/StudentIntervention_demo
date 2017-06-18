@@ -9,3 +9,6 @@ _minted-student_intervention_revisit
 *.log
 *.out
 *.tex
+
+## Don't store the pickled folder
+*.pickle

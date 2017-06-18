@@ -58,6 +58,7 @@ each feature:
       import pickle
    #+END_SRC
 
+
 *** Pre-process
     Let us first observe what the graduation rate is for the class;
 
@@ -78,6 +79,7 @@ each feature:
                  ["Graduation rate of the class:",  "{:.2f}%".format(grad_rate)]], tablefmt="grid")
     #+END_SRC
 
+
     This gives us the following figures;
 
     +--------------------------------+--------+
@@ -93,7 +95,7 @@ each feature:
     +--------------------------------+--------+ \\ \\
 
 
-    Now we will separate the data into the feature columns and our prediction target, i.e. feature "passed".
+    Now we will separate the data into the feature columns and our prediction target, i.e., feature "passed".
 
     #+BEGIN_SRC python :session wrangle_data :results output
       feature_cols = list(student_data.columns[:-1]) # all columns but last are features
@@ -122,6 +124,7 @@ each feature:
           return outX
     #+END_SRC
 
+
     #+BEGIN_SRC python :session wrangle_data :result output
       X_all = preprocess_features(X_all)
     #+END_SRC
@@ -130,7 +133,7 @@ each feature:
     for training. This will leave  300 training samples and 95 test samples. We will employ Sci-kit learn's 
     train_test_split function to perform the data split.
 
-    #+BEGIN_SRC python :session wrangle_data :result output
+    #+BEGIN_SRC python :session wrangle_data :result output exports: results
       from sklearn.model_selection import train_test_split
       X_train, X_test, y_train, y_test = train_test_split(
           X_all, y_all, test_size = .24, random_state = 0)
@@ -140,7 +143,8 @@ each feature:
     #+RESULTS:
     | Training set: 300 samples | Test set: 95 samples |
 
-    #+BEGIN_SRC python :exports none :results output
+
+    #+BEGIN_SRC python :session wrangle_data :results output :exports none
       ## Pickle results here and start a subsequent session of data analysis
       data = { 'X_all' : X_all,
                'y_all' : y_all,
@@ -148,27 +152,41 @@ each feature:
                'y_train' : y_train,
                'X_test' : X_test,
                'y_test' : y_test }
-      with open("./pickled/train_test_split.pickle", 'wb') as f:
+      with open("./pickled/processed_and_split.pickle", 'wb') as f:
           pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
     #+END_SRC
-    
-*** Data Exploration
-    #+BEGIN_SRC python :session dexplore :exports none :results quite
-      import numpy as np
-      import pandas as pd
-      import matplotlib.pyplot as plt
-      from tabulate import tabulate
-      import pickle
-      with open("./pickled/train_test_split.pickle", 'rb') as f:
-          data = pickle.load(f)
-          
-      X_all = data['X_all'] 
-      y_all = data['y_all'] 
-      X_train = data['X_train'] 
-      y_train = data['y_train'] 
-      X_test = data['X_test'] 
-      y_test  = data['y_test'] 
-    #+END_SRC
 
-    #+RESULTS:
+
+** Data Exploration
+   #+BEGIN_SRC python :session dexplore :results output :exports none
+     #########################
+     # Note: Loading a pickle file was succesfull only when setting, :results output, flag
+     # otherwise the file failed to load (though strangely it would load directly from
+     # the session interpreter. Also, unpacking the data variable has to be done on a
+     # separate code block of the same session, otherwise its as if data variable
+     # never loaded...bugy.
+     import numpy as np
+     import pandas as pd
+     import matplotlib.pyplot as plt
+     from tabulate import tabulate
+     import pickle
+     with open("./pickled/processed_and_split.pickle", 'rb') as f:
+         data = pickle.load(f)
+   #+END_SRC
+
+   #+RESULTS:
+   : Python 2.7.13 | packaged by conda-forge | (default, May  2 2017, 12:48:11) 
+   : [GCC 4.8.2 20140120 (Red Hat 4.8.2-15)] on linux2
+   : Type "help", "copyright", "credits" or "license" for more information.
+   : ... python.el: native completion setup loaded
+
+   #+BEGIN_SRC python :session dexplore :exports none
+     X_all = data['X_all'] 
+     y_all = data['y_all'] 
+     X_train = data['X_train'] 
+     y_train = data['y_train'] 
+     X_test = data['X_test'] 
+     y_test  = data['y_test']
+   #+END_SRC
+
 
