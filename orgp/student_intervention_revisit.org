@@ -47,6 +47,7 @@ each feature:
   - absences - number of school absences (numeric: from 0 to 93)
   - passed - did the student pass the final exam (binary: yes or no)
 
+
 ** Loading the data
 *** Imports
     The following python libraries are used in this analysis.
@@ -57,7 +58,6 @@ each feature:
       from tabulate import tabulate
       import pickle
    #+END_SRC
-
 
 *** Pre-process
     Let us first observe what the graduation rate is for the class;
@@ -112,14 +112,18 @@ each feature:
     #+BEGIN_SRC python :session wrangle_data :results output
       def preprocess_features(X):
           outX = pd.DataFrame(index=X.index)  # output dataframe, initially empty
+          #
           # Check each column
           for col, col_data in X.iteritems():
+              #
               # Change the data type for yes/no columns to int
               if col_data.dtype == object:
                   col_data = col_data.replace(['yes', 'no'], [1, 0])
+              #
               # For other categories convert to one or more dummy variables
               if col_data.dtype == object:
                   col_data = pd.get_dummies(col_data, prefix=col)  # e.g. 'school' => 'school_GP', 'school_MS'
+              #    
               outX = outX.join(col_data)  # collect column(s) in output dataframe
           return outX
     #+END_SRC
@@ -137,6 +141,8 @@ each feature:
       from sklearn.model_selection import train_test_split
       X_train, X_test, y_train, y_test = train_test_split(
           X_all, y_all, test_size = .24, random_state = 0)
+      #
+      #
       "Training set: {} samples".format(X_train.shape[0]), "Test set: {} samples".format(X_test.shape[0])
     #+END_SRC
 
@@ -164,7 +170,7 @@ each feature:
      # otherwise the file failed to load (though strangely it would load directly from
      # the session interpreter. Also, unpacking the data variable has to be done on a
      # separate code block of the same session, otherwise its as if data variable
-     # never loaded...bugy.
+     # never loaded.
      import numpy as np
      import pandas as pd
      import matplotlib.pyplot as plt
@@ -173,12 +179,6 @@ each feature:
      with open("./pickled/processed_and_split.pickle", 'rb') as f:
          data = pickle.load(f)
    #+END_SRC
-
-   #+RESULTS:
-   : Python 2.7.13 | packaged by conda-forge | (default, May  2 2017, 12:48:11) 
-   : [GCC 4.8.2 20140120 (Red Hat 4.8.2-15)] on linux2
-   : Type "help", "copyright", "credits" or "license" for more information.
-   : ... python.el: native completion setup loaded
 
    #+BEGIN_SRC python :session dexplore :exports none
      X_all = data['X_all'] 
@@ -189,4 +189,227 @@ each feature:
      y_test  = data['y_test']
    #+END_SRC
 
+   #+RESULTS:
 
+   To identify whether it is appropriate to treat the data under a single model, that is, to identify whether its a manifold of multiple charts or
+   a single chart, we employ a [[http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html][t-sne]] projection. We'll project to 2-dimensions with red labeling failed and blue labeling passing data points.
+   This may or may not reveal some intrinsic clustering relative to our feature of interest 'passed'. It is recommended for t-sne to be fed features
+   scaled to simlar ranges, so this is the first pre-process step. 
+  
+   #+BEGIN_SRC python :session dexplore :results quite
+     from sklearn.preprocessing import MinMaxScaler
+     #
+     scaler = MinMaxScaler()
+     uX_all = scaler.fit_transform(X_all)
+   #+END_SRC
+
+   Since our data set is not large we can indulge in the exact t-sne algorithm instead of the speedier 'barnes-hut'.
+   #+BEGIN_SRC python :session dexplore
+     from sklearn.manifold import TSNE
+     #
+     model = TSNE(n_components=2,
+                  early_exaggeration=4.0,
+                  learning_rate=1000,
+                  n_iter=1000,
+                  init='pca',
+                  random_state=0,
+                  method='exact')
+     #
+     clusters = model.fit_transform(uX_all)
+   #+END_SRC
+
+   #+BEGIN_SRC python :session dexplore :results output
+     # Painting cluster data according to pass or fail
+     x_fail, y_fail = zip(*[ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'no'])
+     x_pass, y_pass = zip(*[ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'yes'])
+     #
+     # Build plot
+     ax = plt.subplot(111)
+     ax.scatter(x_fail, y_fail, s=50, c='red', alpha=0.5, label="student failed")
+     ax.scatter(x_pass, y_pass, s=50, c='blue', alpha=0.5, label="student passed")
+     #
+     # Saving
+     plt.savefig("./figures/t-sne_all.png")
+   #+END_SRC
+
+
+   #+CAPTION: T-SNE 2-d projection all sample points
+   #+NAME: T-SNE All
+   [[./figures/t-sne_all.png]]
+
+   T-SNE reveals no obvious clustering of the data itself, nor of its pass/fail labeling. We will treat the data under a single model.
+
+
+* Training and Evaluating Models
+** Baseline Performance
+   
+   #+BEGIN_SRC python :session modeling :results output :exports none
+     #########################
+     # Note: Loading a pickle file was succesfull only when setting, :results output, flag
+     # otherwise the file failed to load (though strangely it would load directly from
+     # the session interpreter. Also, unpacking the data variable has to be done on a
+     # separate code block of the same session, otherwise its as if data variable
+     # never loaded.
+     import numpy as np
+     import pandas as pd
+     from sklearn.metrics import f1_score
+     #
+     import matplotlib.pyplot as plt
+     from tabulate import tabulate
+     #
+     import pickle
+     import time
+     #
+     #
+     # Helper Functions
+     #
+     # Return the classifier's training time
+     def timeTraining(clf, X_train, y_train):
+ 	start = time.time()
+ 	clf.fit(X_train, y_train)
+ 	end = time.time()
+ 	return (end - start)
+ 
+     #
+     # Return the classifier's predictions and prediction time
+     def predictAndTime(clf, features):
+ 	start = time.time()
+ 	y_pred = clf.predict(features)
+ 	end = time.time()
+ 	return y_pred, (end - start)
+ 
+     #
+     # Return the f1 score for the target values and predictions
+     def F1(target, prediction):
+ 	return f1_score(target.values, prediction, pos_label='yes')
+ 
+     #
+     # Load Data
+     with open("./pickled/processed_and_split.pickle", 'rb') as f:
+ 	data = pickle.load(f)
+ 
+ 	
+   #+END_SRC
+ 
+   #+RESULTS:
+   : Python 2.7.13 | packaged by conda-forge | (default, May  2 2017, 12:48:11) 
+   : [GCC 4.8.2 20140120 (Red Hat 4.8.2-15)] on linux2
+   : Type "help", "copyright", "credits" or "license" for more information.
+   : ... python.el: native completion setup loaded
+ 
+   #+BEGIN_SRC python :session modeling :exports none :results quite
+     X_all = data['X_all'] 
+     y_all = data['y_all'] 
+     X_train = data['X_train'] 
+     y_train = data['y_train'] 
+     X_test = data['X_test'] 
+     y_test  = data['y_test']
+   #+END_SRC
+ 
+   #+RESULTS:
+ 
+ 
+   After an analysis of several algorithms, the details of which can be found [[https://github.com/rortms/Udacity_Machine/blob/master/P2/student_intervention/Final_Report.pdf][here]], we will proceed with
+   the binary classification using a DecisionTree classifier and a K-neighbors classifier for reference.
+ 
+   Kfold cross validation can be used to get the maximum use of a small data set like the one here. We 
+   apply Kfold cross-validation on the training set with 10 folds to have a basic handle on how the models
+   perform out of the box. 
+ 
+   #+BEGIN_SRC python :session modeling
+     from sklearn.tree import DecisionTreeClassifier
+     from sklearn.neighbors import KNeighborsClassifier
+     #
+     from sklearn.cross_validation import KFold
+     #
+     # Setting up KFold cross_validation object
+     kf = KFold(X_train.shape[0], 10)
+     #
+     # Array of classifiers
+     clfs = [DecisionTreeClassifier(criterion = "entropy"),
+             KNeighborsClassifier(n_neighbors = 3)]
+     # 
+     #Gathering Table column and index labels
+     classifier_names = [clf.__class__.__name__ for clf in clfs]
+     benchmarks = ["Training time",  "F1 score training set","Prediction time", "F1 score test set"]
+     table = pd.DataFrame(columns = classifier_names, index = benchmarks)
+     #
+     # Fit Classifiers and average the times and f1 scores resulting from KFold (10 folds)
+     for clf in clfs: 
+         classifier   = clf.__class__.__name__
+         t_test  = 0.0 
+         t_train = 0.0
+         F1_test = 0.0
+         F1_train =0.0
+         #
+         #Averaging scores and seconds accross the folds
+         for tr_i ,t_i in kf:
+             #Train (k-1 buckets)
+             t_train += timeTraining(clf, X_train.iloc[tr_i], y_train.iloc[tr_i])
+             pred_train_set = predictAndTime(clf, X_train.iloc[tr_i])[0]
+             F1_train += F1(y_train.iloc[tr_i], pred_train_set)
+             #Test (kth bucket)
+             pred_test_set, t_t = predictAndTime(clf,X_train.iloc[t_i])
+             t_test += t_t
+             F1_test += F1(y_train.iloc[t_i], pred_test_set)
+         #   
+         #Filling table 
+         table[classifier]['Training time']         = "{:10.4f} s".format(t_train/10)
+         table[classifier]['F1 score training set'] = F1_train/10
+         table[classifier]['Prediction time']       = "{:10.4f} s".format(t_test/10)
+         table[classifier]['F1 score test set']     = F1_test/10
+         
+   #+END_SRC
+ 
+   #+BEGIN_SRC python :session modeling :exports none
+     tabulate(table, headers=["DecisionTreeClassifier", "KNeighborsClassifier"], tablefmt="grid")
+   #+END_SRC
+ 
+   +-----------------------+--------------------------+------------------------+
+   |                       | DecisionTreeClassifier   | KNeighborsClassifier   |
+   +=======================+==========================+========================+
+   | Training time         | 0.0060 s                 | 0.0008 s               |
+   +-----------------------+--------------------------+------------------------+
+   | F1 score training set | 1.0                      | 0.889300900467         |
+   +-----------------------+--------------------------+------------------------+
+   | Prediction time       | 0.0003 s                 | 0.0018 s               |
+   +-----------------------+--------------------------+------------------------+
+   | F1 score test set     | 0.708666825808           | 0.780716646689         |
+   +-----------------------+--------------------------+------------------------+
+ 
+   The results above show that the tree scores perfectly on the training set and it's outperformed by KNN on the test set,
+   with 0.709 to KNN's .781. The tree is most likely overfitting. We will tune both models with a grid search.
+
+** Gridsearch Tuning
+
+   #+BEGIN_SRC python :session modeling
+     # Imports
+     from sklearn import grid_search
+     from sklearn.metrics import make_scorer
+     #
+     scorer = make_scorer(F1)
+     #
+     # GridSearch parameters for Tree
+     tree_param = { 'n_estimators' : range(2,7),'criterion': ["entropy", "gini"], 'max_features':["sqrt", "log2"], 'max_depth': range(2,11),
+                    'min_samples_split':range(2,9), 'min_samples_leaf':range(1,9) }
+     #
+     # Gridsearch parameters for KNN
+     neigh_param = {'n_neighbors' : [3,5,10,20,25,30,40], 'weights' : ['uniform', 'distance'], 'p':[1,2,3,5,10],
+                    'algorithm' : ['ball_tree', 'kd_tree', 'brute']}
+     #
+     #Perform grid Search
+     def gridIt(clf, params):
+         #Grid search folds = 10, for consistency with previous computations
+         grid_clf = grid_search.GridSearchCV(clf, params,
+                                             scorer, n_jobs=4, cv = 10)
+         print clf.__class__.__name__
+         print "Grid search time:", timeTraining(grid_clf, X_train, y_train)
+         print "Parameters of tuned model: ", grid_clf.best_params_
+         y_pred, predict_t = predictAndTime(grid_clf, X_test)
+         print "f1_score and prediction time on X_test, y_test: "
+         print F1(y_test, y_pred), predict_t
+         print '------------------\n'
+         
+     # gridIt(KNeighborsClassifier(), neigh_param)
+     # gridIt(RandomForestClassifier(), tree_param)
+   #+END_SRC

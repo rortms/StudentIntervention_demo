@@ -330,3 +330,46 @@ for age in range(15, 21,2):
 #          xticklabels=['x1', 'x2', 'x3'])#, 'x4'])
 
 # plt.show()
+
+
+
+###########################
+# 15-16 cluster inspection
+   # In  light of this, t-sne was also applied to the data grouped by age of the students (rather arbitrarily), again no clear
+   # clustering was observed except for maybe when looking only at 15-16 year old students. Here is that result;
+
+   # #+BEGIN_SRC python :session dexplore :results output :export none
+   #   # Painting cluster data according to pass or fail
+   #   lower, upper = 15, 17 # excluding upper bound
+   #   #    
+   #   x_f, y_f = zip(*[ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'no' and \
+   #                     X_all['age'][i] >= lower and X_all['age'][i] < upper ])
+   #   #
+   #   x_pss, y_pss = zip(*[ tuple(pt) for i, pt in enumerate(clusters) if y_all[i] == 'yes' and \
+   #                         X_all['age'][i] >= lower and X_all['age'][i] < upper ])
+   #   #
+   #   # Regression line
+   #   p1, p2 = (-20., 40.), (12.,-40.)
+   #   m = (p2[1]-p1[1])/(p2[0]-p1[0])
+   #   b = p2[1] - m * p2[0]
+   #   x = np.arange(-25,25)
+   #   #
+   #   # Build plot
+   #   ax2 = plt.subplot(111)
+   #   ax2.scatter(x_f, y_f, s=50, c='red', alpha=0.5, label="student failed")
+   #   ax2.scatter(x_pss, y_pss, s=50, c='blue', alpha=0.5, label="student passed")
+   #   ax2.plot(x, m*x + b, '.')
+   #   #
+   #   # Saving
+   #   plt.savefig("./figures/t-sne_15-16.png")
+   # #+END_SRC
+
+   # #+RESULTS:
+   # : 
+   # : >>> ... ... >>> ... ... >>> ... ... >>> >>> >>> >>> ... ... >>> <matplotlib.collections.PathCollection object at 0x7fab9f3fa110>
+   # : <matplotlib.collections.PathCollection object at 0x7fab9f3b3d50>
+   # : [<matplotlib.lines.Line2D object at 0x7fab9f3b3750>]
+
+   # #+CAPTION: T-SNE 2-d projection 15-16 year olds
+   # #+NAME: T-SNE 15-16 yo
+   # [[./figures/t-sne_15-16.png]]

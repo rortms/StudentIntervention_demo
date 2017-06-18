@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Supervised Learning: Building a Student Intervention System</title>
-<!-- 2017-06-18 Sun 01:43 -->
+<!-- 2017-06-18 Sun 17:43 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Robert M Salom" />
@@ -179,9 +179,9 @@ each feature:
 </li>
 <li>Fedu - father&rsquo;s education (numeric: 0 - none, 1 - primary education (4th grade), 2 – 5th to 9th grade, 3 – secondary education or 4 – higher education)
 </li>
-<li>Mjob - mother&rsquo;s job (nominal: &ldquo;teacher&rdquo;, &ldquo;health&rdquo; care related, civil &ldquo;services&rdquo; (e.g. administrative or police), &ldquo;at<sub>home</sub>&rdquo; or &ldquo;other&rdquo;)
+<li>Mjob - mother&rsquo;s job (nominal: &ldquo;teacher&rdquo;, &ldquo;health&rdquo; care related, civil &ldquo;services&rdquo; (e.g. administrative or police), &ldquo;at_home&rdquo; or &ldquo;other&rdquo;)
 </li>
-<li>Fjob - father&rsquo;s job (nominal: &ldquo;teacher&rdquo;, &ldquo;health&rdquo; care related, civil &ldquo;services&rdquo; (e.g. administrative or police), &ldquo;at<sub>home</sub>&rdquo; or &ldquo;other&rdquo;)
+<li>Fjob - father&rsquo;s job (nominal: &ldquo;teacher&rdquo;, &ldquo;health&rdquo; care related, civil &ldquo;services&rdquo; (e.g. administrative or police), &ldquo;at_home&rdquo; or &ldquo;other&rdquo;)
 </li>
 <li>reason - reason to choose this school (nominal: close to &ldquo;home&rdquo;, school &ldquo;reputation&rdquo;, &ldquo;course&rdquo; preference or &ldquo;other&rdquo;)
 </li>
@@ -229,6 +229,7 @@ each feature:
 </div>
 </div>
 
+
 <div id="outline-container-sec-2-2" class="outline-3">
 <h3 id="sec-2-2"><span class="section-number-3">2.2</span> Loading the data</h3>
 <div class="outline-text-3" id="text-2-2">
@@ -240,16 +241,15 @@ The following python libraries are used in this analysis.
 </p>
 <div class="org-src-container">
 
-<pre class="src src-python"><span style="color: #F92672;">import</span> numpy <span style="color: #F92672;">as</span> np
-<span style="color: #F92672;">import</span> pandas <span style="color: #F92672;">as</span> pd
-<span style="color: #F92672;">import</span> matplotlib.pyplot <span style="color: #F92672;">as</span> plt
-<span style="color: #F92672;">from</span> tabulate <span style="color: #F92672;">import</span> tabulate
-<span style="color: #F92672;">import</span> pickle
+<pre class="src src-python"><span style="color: #0000FF;">import</span> numpy <span style="color: #0000FF;">as</span> np
+<span style="color: #0000FF;">import</span> pandas <span style="color: #0000FF;">as</span> pd
+<span style="color: #0000FF;">import</span> matplotlib.pyplot <span style="color: #0000FF;">as</span> plt
+<span style="color: #0000FF;">from</span> tabulate <span style="color: #0000FF;">import</span> tabulate
+<span style="color: #0000FF;">import</span> pickle
 </pre>
 </div>
 </div>
 </div>
-
 
 <div id="outline-container-sec-2-2-2" class="outline-4">
 <h4 id="sec-2-2-2"><span class="section-number-4">2.2.2</span> Pre-process</h4>
@@ -260,20 +260,20 @@ Let us first observe what the graduation rate is for the class;
 
 <div class="org-src-container">
 
-<pre class="src src-python"><span style="color: #FD971F;">student_data</span> = pd.read_csv(<span style="color: #E6DB74;">"student-data.csv"</span>)
+<pre class="src src-python"><span style="color: #BA36A5;">student_data</span> = pd.read_csv(<span style="color: #008000;">"student-data.csv"</span>)
 
-<span style="color: #FD971F;">n_students</span> = student_data.shape[0]
-<span style="color: #FD971F;">n_features</span> = student_data.shape[1] - 1
-<span style="color: #FD971F;">n_passed</span> = <span style="color: #F92672;">sum</span>([1 <span style="color: #F92672;">for</span> y <span style="color: #F92672;">in</span> student_data[<span style="color: #E6DB74;">'passed'</span>] <span style="color: #F92672;">if</span> y == <span style="color: #E6DB74;">'yes'</span>])
-<span style="color: #FD971F;">n_failed</span> = <span style="color: #F92672;">sum</span>([1 <span style="color: #F92672;">for</span> n <span style="color: #F92672;">in</span> student_data[<span style="color: #E6DB74;">'passed'</span>] <span style="color: #F92672;">if</span> n == <span style="color: #E6DB74;">'no'</span>])
-<span style="color: #FD971F;">grad_rate</span> = 100.*n_passed/(n_passed + n_failed)
+<span style="color: #BA36A5;">n_students</span> = student_data.shape[0]
+<span style="color: #BA36A5;">n_features</span> = student_data.shape[1] - 1
+<span style="color: #BA36A5;">n_passed</span> = <span style="color: #006FE0;">sum</span>([1 <span style="color: #0000FF;">for</span> y <span style="color: #0000FF;">in</span> student_data[<span style="color: #008000;">'passed'</span>] <span style="color: #0000FF;">if</span> y == <span style="color: #008000;">'yes'</span>])
+<span style="color: #BA36A5;">n_failed</span> = <span style="color: #006FE0;">sum</span>([1 <span style="color: #0000FF;">for</span> n <span style="color: #0000FF;">in</span> student_data[<span style="color: #008000;">'passed'</span>] <span style="color: #0000FF;">if</span> n == <span style="color: #008000;">'no'</span>])
+<span style="color: #BA36A5;">grad_rate</span> = 100.*n_passed/(n_passed + n_failed)
 
 
-tabulate( [[<span style="color: #E6DB74;">"Total number of students: "</span>,n_students],
-           [<span style="color: #E6DB74;">"Number of students who passed: "</span>,n_passed],
-           [<span style="color: #E6DB74;">"Number of students who failed: "</span>,n_failed],
-           [<span style="color: #E6DB74;">"Number of features: "</span>,n_features],
-           [<span style="color: #E6DB74;">"Graduation rate of the class:"</span>,  <span style="color: #E6DB74;">"{:.2f}%"</span>.<span style="color: #F92672;">format</span>(grad_rate)]], tablefmt=<span style="color: #E6DB74;">"grid"</span>)
+tabulate( [[<span style="color: #008000;">"Total number of students: "</span>,n_students],
+           [<span style="color: #008000;">"Number of students who passed: "</span>,n_passed],
+           [<span style="color: #008000;">"Number of students who failed: "</span>,n_failed],
+           [<span style="color: #008000;">"Number of features: "</span>,n_features],
+           [<span style="color: #008000;">"Graduation rate of the class:"</span>,  <span style="color: #008000;">"{:.2f}%"</span>.<span style="color: #006FE0;">format</span>(grad_rate)]], tablefmt=<span style="color: #008000;">"grid"</span>)
 </pre>
 </div>
 
@@ -333,56 +333,62 @@ Now we will separate the data into the feature columns and our prediction target
 
 <div class="org-src-container">
 
-<pre class="src src-python"><span style="color: #FD971F;">feature_cols</span> = <span style="color: #F92672;">list</span>(student_data.columns[:-1]) <span style="color: #75715E;"># </span><span style="color: #75715E;">all columns but last are features</span>
-<span style="color: #FD971F;">target_col</span> = student_data.columns[-1]          <span style="color: #75715E;"># </span><span style="color: #75715E;">last column is the target/label</span>
+<pre class="src src-python"><span style="color: #BA36A5;">feature_cols</span> = <span style="color: #006FE0;">list</span>(student_data.columns[:-1]) <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">all columns but last are features</span>
+<span style="color: #BA36A5;">target_col</span> = student_data.columns[-1]          <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">last column is the target/label</span>
 
-<span style="color: #FD971F;">X_all</span> = student_data[feature_cols]             <span style="color: #75715E;"># </span><span style="color: #75715E;">feature values for all students</span>
-<span style="color: #FD971F;">y_all</span> = student_data[target_col]               <span style="color: #75715E;"># </span><span style="color: #75715E;">corresponding targets/labels</span>
+<span style="color: #BA36A5;">X_all</span> = student_data[feature_cols]             <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">feature values for all students</span>
+<span style="color: #BA36A5;">y_all</span> = student_data[target_col]               <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">corresponding targets/labels</span>
 </pre>
 </div>
 
 
 <p>
 Addiontally, we must transform all categorical features into binary/numeric ones in order to be processed
-by subsequent algorithms. Pandas&rsquo; <a href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.get_dummies.html?highlight=get_dummies#pandas.get_dummies">get<sub>dummies</sub></a> function will come in handy.
+by subsequent algorithms. Pandas&rsquo; <a href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.get_dummies.html?highlight=get_dummies#pandas.get_dummies">get_dummies</a> function will come in handy.
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-python"><span style="color: #F92672;">def</span> <span style="color: #A6E22E;">preprocess_features</span>(X):
-    <span style="color: #FD971F;">outX</span> = pd.DataFrame(index=X.index)  <span style="color: #75715E;"># </span><span style="color: #75715E;">output dataframe, initially empty</span>
-    <span style="color: #75715E;"># </span><span style="color: #75715E;">Check each column</span>
-    <span style="color: #F92672;">for</span> col, col_data <span style="color: #F92672;">in</span> X.iteritems():
-        <span style="color: #75715E;"># </span><span style="color: #75715E;">Change the data type for yes/no columns to int</span>
-        <span style="color: #F92672;">if</span> col_data.dtype == <span style="color: #F92672;">object</span>:
-            <span style="color: #FD971F;">col_data</span> = col_data.replace([<span style="color: #E6DB74;">'yes'</span>, <span style="color: #E6DB74;">'no'</span>], [1, 0])
-        <span style="color: #75715E;"># </span><span style="color: #75715E;">For other categories convert to one or more dummy variables</span>
-        <span style="color: #F92672;">if</span> col_data.dtype == <span style="color: #F92672;">object</span>:
-            <span style="color: #FD971F;">col_data</span> = pd.get_dummies(col_data, prefix=col)  <span style="color: #75715E;"># </span><span style="color: #75715E;">e.g. 'school' =&gt; 'school_GP', 'school_MS'</span>
-        <span style="color: #FD971F;">outX</span> = outX.join(col_data)  <span style="color: #75715E;"># </span><span style="color: #75715E;">collect column(s) in output dataframe</span>
-    <span style="color: #F92672;">return</span> outX
+<pre class="src src-python"><span style="color: #0000FF;">def</span> <span style="color: #006699;">preprocess_features</span>(X):
+    <span style="color: #BA36A5;">outX</span> = pd.DataFrame(index=X.index)  <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">output dataframe, initially empty</span>
+    <span style="color: #8D8D84;">#</span>
+    <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Check each column</span>
+    <span style="color: #0000FF;">for</span> col, col_data <span style="color: #0000FF;">in</span> X.iteritems():
+        <span style="color: #8D8D84;">#</span>
+        <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Change the data type for yes/no columns to int</span>
+        <span style="color: #0000FF;">if</span> col_data.dtype == <span style="color: #006FE0;">object</span>:
+            <span style="color: #BA36A5;">col_data</span> = col_data.replace([<span style="color: #008000;">'yes'</span>, <span style="color: #008000;">'no'</span>], [1, 0])
+        <span style="color: #8D8D84;">#</span>
+        <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">For other categories convert to one or more dummy variables</span>
+        <span style="color: #0000FF;">if</span> col_data.dtype == <span style="color: #006FE0;">object</span>:
+            <span style="color: #BA36A5;">col_data</span> = pd.get_dummies(col_data, prefix=col)  <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">e.g. 'school' =&gt; 'school_GP', 'school_MS'</span>
+        <span style="color: #8D8D84;">#    </span>
+        <span style="color: #BA36A5;">outX</span> = outX.join(col_data)  <span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">collect column(s) in output dataframe</span>
+    <span style="color: #0000FF;">return</span> outX
 </pre>
 </div>
 
 
 <div class="org-src-container">
 
-<pre class="src src-python"><span style="color: #FD971F;">X_all</span> = preprocess_features(X_all)
+<pre class="src src-python"><span style="color: #BA36A5;">X_all</span> = preprocess_features(X_all)
 </pre>
 </div>
 
 <p>
 Now we are ready to split the data into training and test sets. Approximately 75% of the data will be used
 for training. This will leave  300 training samples and 95 test samples. We will employ Sci-kit learn&rsquo;s 
-train<sub>test</sub><sub>split</sub> function to perform the data split.
+train_test_split function to perform the data split.
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-python"><span style="color: #F92672;">from</span> sklearn.model_selection <span style="color: #F92672;">import</span> train_test_split
-<span style="color: #FD971F;">X_train</span>, <span style="color: #FD971F;">X_test</span>, <span style="color: #FD971F;">y_train</span>, <span style="color: #FD971F;">y_test</span> = train_test_split(
+<pre class="src src-python"><span style="color: #0000FF;">from</span> sklearn.model_selection <span style="color: #0000FF;">import</span> train_test_split
+<span style="color: #BA36A5;">X_train</span>, <span style="color: #BA36A5;">X_test</span>, <span style="color: #BA36A5;">y_train</span>, <span style="color: #BA36A5;">y_test</span> = train_test_split(
     X_all, y_all, test_size = .24, random_state = 0)
-<span style="color: #75715E;">"Training set: {} samples"</span>.<span style="color: #F92672;">format</span>(X_train.shape[0]), <span style="color: #75715E;">"Test set: {} samples"</span>.<span style="color: #F92672;">format</span>(X_test.shape[0])
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;">#</span>
+<span style="color: #036A07;">"Training set: {} samples"</span>.<span style="color: #006FE0;">format</span>(X_train.shape[0]), <span style="color: #036A07;">"Test set: {} samples"</span>.<span style="color: #006FE0;">format</span>(X_test.shape[0])
 </pre>
 </div>
 </div>
@@ -392,6 +398,240 @@ train<sub>test</sub><sub>split</sub> function to perform the data split.
 
 <div id="outline-container-sec-2-3" class="outline-3">
 <h3 id="sec-2-3"><span class="section-number-3">2.3</span> Data Exploration</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+To identify whether it is appropriate to treat the data under a single model, that is, to identify whether its a manifold of multiple charts or
+a single chart, we employ a <a href="http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">t-sne</a> projection. We&rsquo;ll project to 2-dimensions with red labeling failed and blue labeling passing data points.
+This may or may not reveal some intrinsic clustering relative to our feature of interest &lsquo;passed&rsquo;. It is recommended for t-sne to be fed features
+scaled to simlar ranges, so this is the first pre-process step. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #0000FF;">from</span> sklearn.preprocessing <span style="color: #0000FF;">import</span> MinMaxScaler
+<span style="color: #8D8D84;">#</span>
+<span style="color: #BA36A5;">scaler</span> = MinMaxScaler()
+<span style="color: #BA36A5;">uX_all</span> = scaler.fit_transform(X_all)
+</pre>
+</div>
+
+<p>
+Since our data set is not large we can indulge in the exact t-sne algorithm instead of the speedier &lsquo;barnes-hut&rsquo;.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #0000FF;">from</span> sklearn.manifold <span style="color: #0000FF;">import</span> TSNE
+<span style="color: #8D8D84;">#</span>
+<span style="color: #BA36A5;">model</span> = TSNE(n_components=2,
+             early_exaggeration=4.0,
+             learning_rate=1000,
+             n_iter=1000,
+             init=<span style="color: #008000;">'pca'</span>,
+             random_state=0,
+             method=<span style="color: #008000;">'exact'</span>)
+<span style="color: #8D8D84;">#</span>
+<span style="color: #BA36A5;">clusters</span> = model.fit_transform(uX_all)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Painting cluster data according to pass or fail</span>
+<span style="color: #BA36A5;">x_fail</span>, <span style="color: #BA36A5;">y_fail</span> = <span style="color: #006FE0;">zip</span>(*[ <span style="color: #006FE0;">tuple</span>(pt) <span style="color: #0000FF;">for</span> i, pt <span style="color: #0000FF;">in</span> <span style="color: #006FE0;">enumerate</span>(clusters) <span style="color: #0000FF;">if</span> y_all[i] == <span style="color: #008000;">'no'</span>])
+<span style="color: #BA36A5;">x_pass</span>, <span style="color: #BA36A5;">y_pass</span> = <span style="color: #006FE0;">zip</span>(*[ <span style="color: #006FE0;">tuple</span>(pt) <span style="color: #0000FF;">for</span> i, pt <span style="color: #0000FF;">in</span> <span style="color: #006FE0;">enumerate</span>(clusters) <span style="color: #0000FF;">if</span> y_all[i] == <span style="color: #008000;">'yes'</span>])
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Build plot</span>
+<span style="color: #BA36A5;">ax</span> = plt.subplot(111)
+ax.scatter(x_fail, y_fail, s=50, c=<span style="color: #008000;">'red'</span>, alpha=0.5, label=<span style="color: #008000;">"student failed"</span>)
+ax.scatter(x_pass, y_pass, s=50, c=<span style="color: #008000;">'blue'</span>, alpha=0.5, label=<span style="color: #008000;">"student passed"</span>)
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Saving</span>
+plt.savefig(<span style="color: #008000;">"./figures/t-sne_all.png"</span>)
+</pre>
+</div>
+
+
+
+<div id="T-SNE-All" class="figure">
+<p><img src="./figures/t-sne_all.png" alt="t-sne_all.png" />
+</p>
+<p><span class="figure-number">Figure 1:</span> T-SNE 2-d projection all sample points</p>
+</div>
+
+<p>
+T-SNE reveals no obvious clustering of the data itself, nor of its pass/fail labeling. We will treat the data under a single model.
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Training and Evaluating Models</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Baseline Performance</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+After an analysis of several algorithms, the details of which can be found <a href="https://github.com/rortms/Udacity_Machine/blob/master/P2/student_intervention/Final_Report.pdf">here</a>, we will proceed with
+the binary classification using a DecisionTree classifier and a K-neighbors classifier for reference.
+</p>
+
+<p>
+Kfold cross validation can be used to get the maximum use of a small data set like the one here. We 
+apply Kfold cross-validation on the training set with 10 folds to have a basic handle on how the models
+perform out of the box. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #0000FF;">from</span> sklearn.tree <span style="color: #0000FF;">import</span> DecisionTreeClassifier
+<span style="color: #0000FF;">from</span> sklearn.neighbors <span style="color: #0000FF;">import</span> KNeighborsClassifier
+<span style="color: #8D8D84;">#</span>
+<span style="color: #0000FF;">from</span> sklearn.cross_validation <span style="color: #0000FF;">import</span> KFold
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Setting up KFold cross_validation object</span>
+<span style="color: #BA36A5;">kf</span> = KFold(X_train.shape[0], 10)
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Array of classifiers</span>
+<span style="color: #BA36A5;">clfs</span> = [DecisionTreeClassifier(criterion = <span style="color: #008000;">"entropy"</span>),
+        KNeighborsClassifier(n_neighbors = 3)]
+<span style="color: #8D8D84;"># </span>
+<span style="color: #8D8D84;">#</span><span style="color: #8D8D84; font-style: italic;">Gathering Table column and index labels</span>
+<span style="color: #BA36A5;">classifier_names</span> = [clf.__class__.<span style="color: #006FE0;">__name__</span> <span style="color: #0000FF;">for</span> clf <span style="color: #0000FF;">in</span> clfs]
+<span style="color: #BA36A5;">benchmarks</span> = [<span style="color: #008000;">"Training time"</span>,  <span style="color: #008000;">"F1 score training set"</span>,<span style="color: #008000;">"Prediction time"</span>, <span style="color: #008000;">"F1 score test set"</span>]
+<span style="color: #BA36A5;">table</span> = pd.DataFrame(columns = classifier_names, index = benchmarks)
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Fit Classifiers and average the times and f1 scores resulting from KFold (10 folds)</span>
+<span style="color: #0000FF;">for</span> clf <span style="color: #0000FF;">in</span> clfs: 
+    <span style="color: #BA36A5;">classifier</span>   = clf.__class__.<span style="color: #006FE0;">__name__</span>
+    <span style="color: #BA36A5;">t_test</span>  = 0.0 
+    <span style="color: #BA36A5;">t_train</span> = 0.0
+    <span style="color: #BA36A5;">F1_test</span> = 0.0
+    <span style="color: #BA36A5;">F1_train</span> =0.0
+    <span style="color: #8D8D84;">#</span>
+    <span style="color: #8D8D84;">#</span><span style="color: #8D8D84; font-style: italic;">Averaging scores and seconds accross the folds</span>
+    <span style="color: #0000FF;">for</span> tr_i ,t_i <span style="color: #0000FF;">in</span> kf:
+        <span style="color: #8D8D84;">#</span><span style="color: #8D8D84; font-style: italic;">Train (k-1 buckets)</span>
+        <span style="color: #BA36A5;">t_train</span> += timeTraining(clf, X_train.iloc[tr_i], y_train.iloc[tr_i])
+        <span style="color: #BA36A5;">pred_train_set</span> = predictAndTime(clf, X_train.iloc[tr_i])[0]
+        <span style="color: #BA36A5;">F1_train</span> += F1(y_train.iloc[tr_i], pred_train_set)
+        <span style="color: #8D8D84;">#</span><span style="color: #8D8D84; font-style: italic;">Test (kth bucket)</span>
+        <span style="color: #BA36A5;">pred_test_set</span>, <span style="color: #BA36A5;">t_t</span> = predictAndTime(clf,X_train.iloc[t_i])
+        <span style="color: #BA36A5;">t_test</span> += t_t
+        <span style="color: #BA36A5;">F1_test</span> += F1(y_train.iloc[t_i], pred_test_set)
+    <span style="color: #8D8D84;">#   </span>
+    <span style="color: #8D8D84;">#</span><span style="color: #8D8D84; font-style: italic;">Filling table </span>
+    table[classifier][<span style="color: #008000;">'Training time'</span>]         = <span style="color: #008000;">"{:10.4f} s"</span>.<span style="color: #006FE0;">format</span>(t_train/10)
+    table[classifier][<span style="color: #008000;">'F1 score training set'</span>] = F1_train/10
+    table[classifier][<span style="color: #008000;">'Prediction time'</span>]       = <span style="color: #008000;">"{:10.4f} s"</span>.<span style="color: #006FE0;">format</span>(t_test/10)
+    table[classifier][<span style="color: #008000;">'F1 score test set'</span>]     = F1_test/10
+</pre>
+</div>
+
+<!-- This HTML table template is generated by emacs 25.1.1 -->
+<table border="1">
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;DecisionTreeClassifier&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;KNeighborsClassifier&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;Training&nbsp;time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;0.0060&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;0.0008&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;F1&nbsp;score&nbsp;training&nbsp;set&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;0.889300900467&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;Prediction&nbsp;time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;0.0003&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;0.0018&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;F1&nbsp;score&nbsp;test&nbsp;set&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;0.708666825808&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;0.780716646689&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+</table>
+
+<p>
+The results above show that the tree scores perfectly on the training set and it&rsquo;s outperformed by KNN on the test set,
+with 0.709 to KNN&rsquo;s .781. The tree is most likely overfitting. We will tune both models with a grid search.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Gridsearch Tuning</h3>
+<div class="outline-text-3" id="text-3-2">
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Imports</span>
+<span style="color: #0000FF;">from</span> sklearn <span style="color: #0000FF;">import</span> grid_search
+<span style="color: #0000FF;">from</span> sklearn.metrics <span style="color: #0000FF;">import</span> make_scorer
+<span style="color: #8D8D84;">#</span>
+<span style="color: #BA36A5;">scorer</span> = make_scorer(F1)
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">GridSearch parameters for Tree</span>
+<span style="color: #BA36A5;">tree_param</span> = { <span style="color: #008000;">'n_estimators'</span> : <span style="color: #006FE0;">range</span>(2,7),<span style="color: #008000;">'criterion'</span>: [<span style="color: #008000;">"entropy"</span>, <span style="color: #008000;">"gini"</span>], <span style="color: #008000;">'max_features'</span>:[<span style="color: #008000;">"sqrt"</span>, <span style="color: #008000;">"log2"</span>], <span style="color: #008000;">'max_depth'</span>: <span style="color: #006FE0;">range</span>(2,11),
+               <span style="color: #008000;">'min_samples_split'</span>:<span style="color: #006FE0;">range</span>(2,9), <span style="color: #008000;">'min_samples_leaf'</span>:<span style="color: #006FE0;">range</span>(1,9) }
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Gridsearch parameters for KNN</span>
+<span style="color: #BA36A5;">neigh_param</span> = {<span style="color: #008000;">'n_neighbors'</span> : [3,5,10,20,25,30,40], <span style="color: #008000;">'weights'</span> : [<span style="color: #008000;">'uniform'</span>, <span style="color: #008000;">'distance'</span>], <span style="color: #008000;">'p'</span>:[1,2,3,5,10],
+               <span style="color: #008000;">'algorithm'</span> : [<span style="color: #008000;">'ball_tree'</span>, <span style="color: #008000;">'kd_tree'</span>, <span style="color: #008000;">'brute'</span>]}
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;">#</span><span style="color: #8D8D84; font-style: italic;">Perform grid Search</span>
+<span style="color: #0000FF;">def</span> <span style="color: #006699;">gridIt</span>(clf, params):
+    <span style="color: #8D8D84;">#</span><span style="color: #8D8D84; font-style: italic;">Grid search folds = 10, for consistency with previous computations</span>
+    <span style="color: #BA36A5;">grid_clf</span> = grid_search.GridSearchCV(clf, params,
+                                        scorer, n_jobs=4, cv = 10)
+    <span style="color: #0000FF;">print</span> clf.__class__.<span style="color: #006FE0;">__name__</span>
+    <span style="color: #0000FF;">print</span> <span style="color: #008000;">"Grid search time:"</span>, timeTraining(grid_clf, X_train, y_train)
+    <span style="color: #0000FF;">print</span> <span style="color: #008000;">"Parameters of tuned model: "</span>, grid_clf.best_params_
+    <span style="color: #BA36A5;">y_pred</span>, <span style="color: #BA36A5;">predict_t</span> = predictAndTime(grid_clf, X_test)
+    <span style="color: #0000FF;">print</span> <span style="color: #008000;">"f1_score and prediction time on X_test, y_test: "</span>
+    <span style="color: #0000FF;">print</span> F1(y_test, y_pred), predict_t
+    <span style="color: #0000FF;">print</span> <span style="color: #008000;">'------------------\n'</span>
+
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">gridIt(KNeighborsClassifier(), neigh_param)</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">gridIt(RandomForestClassifier(), tree_param)</span>
+</pre>
+</div>
+</div>
 </div>
 </div>
 </div>

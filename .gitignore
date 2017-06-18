@@ -12,3 +12,5 @@ _minted-student_intervention_revisit
 
 ## Don't store the pickled folder
 *.pickle
+*.pkl
+
