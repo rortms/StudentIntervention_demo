@@ -1,8 +1,8 @@
-#+Title: Supervised Learning: \\ Building a Student Intervention System
+#+Title: Supervised Learning: Building a Student Intervention System
 #+AUTHOR: Robert M Salom
-#+OPTIONS: toc:nil
+#+OPTIONS: toc:nil 
 #+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
-
+# (setq org-export-with-sub-superscripts nil) #eval on scratch to turn off subscripting
 * Obective 
 The goal of this project is to identify students who might need early intervention. We want to predict whether a given student will pass or fail
 based on information about his life and habits. Therefore we approach this task as a classification problem with two classes, pass and fail.
@@ -47,7 +47,7 @@ each feature:
   - absences - number of school absences (numeric: from 0 to 93)
   - passed - did the student pass the final exam (binary: yes or no)
 
-** Load the data
+** Loading the data
 *** Imports
     The following python libraries are used in this analysis.
     #+BEGIN_SRC python :results output :session wrangle_data 
@@ -55,10 +55,11 @@ each feature:
       import pandas as pd
       import matplotlib.pyplot as plt
       from tabulate import tabulate
+      import pickle
    #+END_SRC
 
 *** Pre-process
-    Lets first observe what the graduation rate is for the class;
+    Let us first observe what the graduation rate is for the class;
 
     #+BEGIN_SRC python  :session wrangle_data 
       student_data = pd.read_csv("student-data.csv")
@@ -75,21 +76,99 @@ each feature:
                  ["Number of students who failed: ",n_failed],
                  ["Number of features: ",n_features],
                  ["Graduation rate of the class:",  "{:.2f}%".format(grad_rate)]], tablefmt="grid")
-
     #+END_SRC
 
     This gives us the following figures;
 
-   +--------------------------------+--------+
-   | Total number of students:      | 395    |
-   +--------------------------------+--------+
-   | Number of students who passed: | 265    |
-   +--------------------------------+--------+
-   | Number of students who failed: | 130    |
-   +--------------------------------+--------+
-   | Number of features:            | 30     |
-   +--------------------------------+--------+
-   | Graduation rate of the class:  | 67.09% |
-   +--------------------------------+--------+
+    +--------------------------------+--------+
+    | Total number of students:      | 395    |
+    +--------------------------------+--------+
+    | Number of students who passed: | 265    |
+    +--------------------------------+--------+
+    | Number of students who failed: | 130    |
+    +--------------------------------+--------+
+    | Number of features:            | 30     |
+    +--------------------------------+--------+
+    | Graduation rate of the class:  | 67.09% |
+    +--------------------------------+--------+ \\ \\
 
+
+    Now we will separate the data into the feature columns and our prediction target, i.e. feature "passed".
+
+    #+BEGIN_SRC python :session wrangle_data :results output
+      feature_cols = list(student_data.columns[:-1]) # all columns but last are features
+      target_col = student_data.columns[-1]          # last column is the target/label
+
+      X_all = student_data[feature_cols]             # feature values for all students
+      y_all = student_data[target_col]               # corresponding targets/labels
+    #+END_SRC
+
+
+    Addiontally, we must transform all categorical features into binary/numeric ones in order to be processed
+    by subsequent algorithms. Pandas' [[http://pandas.pydata.org/pandas-docs/stable/generated/pandas.get_dummies.html?highlight=get_dummies#pandas.get_dummies][get_dummies]] function will come in handy.
+
+    #+BEGIN_SRC python :session wrangle_data :results output
+      def preprocess_features(X):
+          outX = pd.DataFrame(index=X.index)  # output dataframe, initially empty
+          # Check each column
+          for col, col_data in X.iteritems():
+              # Change the data type for yes/no columns to int
+              if col_data.dtype == object:
+                  col_data = col_data.replace(['yes', 'no'], [1, 0])
+              # For other categories convert to one or more dummy variables
+              if col_data.dtype == object:
+                  col_data = pd.get_dummies(col_data, prefix=col)  # e.g. 'school' => 'school_GP', 'school_MS'
+              outX = outX.join(col_data)  # collect column(s) in output dataframe
+          return outX
+    #+END_SRC
+
+    #+BEGIN_SRC python :session wrangle_data :result output
+      X_all = preprocess_features(X_all)
+    #+END_SRC
+
+    Now we are ready to split the data into training and test sets. Approximately 75% of the data will be used
+    for training. This will leave  300 training samples and 95 test samples. We will employ Sci-kit learn's 
+    train_test_split function to perform the data split.
+
+    #+BEGIN_SRC python :session wrangle_data :result output
+      from sklearn.model_selection import train_test_split
+      X_train, X_test, y_train, y_test = train_test_split(
+          X_all, y_all, test_size = .24, random_state = 0)
+      "Training set: {} samples".format(X_train.shape[0]), "Test set: {} samples".format(X_test.shape[0])
+    #+END_SRC
+
+    #+RESULTS:
+    | Training set: 300 samples | Test set: 95 samples |
+
+    #+BEGIN_SRC python :exports none :results output
+      ## Pickle results here and start a subsequent session of data analysis
+      data = { 'X_all' : X_all,
+               'y_all' : y_all,
+               'X_train' : X_train,
+               'y_train' : y_train,
+               'X_test' : X_test,
+               'y_test' : y_test }
+      with open("./pickled/train_test_split.pickle", 'wb') as f:
+          pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+    #+END_SRC
+    
+*** Data Exploration
+    #+BEGIN_SRC python :session dexplore :exports none :results quite
+      import numpy as np
+      import pandas as pd
+      import matplotlib.pyplot as plt
+      from tabulate import tabulate
+      import pickle
+      with open("./pickled/train_test_split.pickle", 'rb') as f:
+          data = pickle.load(f)
+          
+      X_all = data['X_all'] 
+      y_all = data['y_all'] 
+      X_train = data['X_train'] 
+      y_train = data['y_train'] 
+      X_test = data['X_test'] 
+      y_test  = data['y_test'] 
+    #+END_SRC
+
+    #+RESULTS:
 
