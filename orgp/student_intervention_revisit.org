@@ -244,12 +244,6 @@ each feature:
 ** Baseline Performance
    
    #+BEGIN_SRC python :session modeling :results output :exports none
-     #########################
-     # Note: Loading a pickle file was succesfull only when setting, :results output, flag
-     # otherwise the file failed to load (though strangely it would load directly from
-     # the session interpreter. Also, unpacking the data variable has to be done on a
-     # separate code block of the same session, otherwise its as if data variable
-     # never loaded.
      import numpy as np
      import pandas as pd
      from sklearn.metrics import f1_score
@@ -263,40 +257,34 @@ each feature:
      #
      # Helper Functions
      #
+
      # Return the classifier's training time
      def timeTraining(clf, X_train, y_train):
- 	start = time.time()
- 	clf.fit(X_train, y_train)
- 	end = time.time()
- 	return (end - start)
- 
+        start = time.time()
+        clf.fit(X_train, y_train)
+        end = time.time()
+        return (end - start)
+
      #
      # Return the classifier's predictions and prediction time
      def predictAndTime(clf, features):
- 	start = time.time()
- 	y_pred = clf.predict(features)
- 	end = time.time()
- 	return y_pred, (end - start)
- 
+        start = time.time()
+        y_pred = clf.predict(features)
+        end = time.time()
+        return y_pred, (end - start)
+
      #
      # Return the f1 score for the target values and predictions
      def F1(target, prediction):
- 	return f1_score(target.values, prediction, pos_label='yes')
- 
+        return f1_score(target.values, prediction, pos_label='yes')
+
      #
      # Load Data
      with open("./pickled/processed_and_split.pickle", 'rb') as f:
- 	data = pickle.load(f)
- 
- 	
-   #+END_SRC
- 
-   #+RESULTS:
-   : Python 2.7.13 | packaged by conda-forge | (default, May  2 2017, 12:48:11) 
-   : [GCC 4.8.2 20140120 (Red Hat 4.8.2-15)] on linux2
-   : Type "help", "copyright", "credits" or "license" for more information.
-   : ... python.el: native completion setup loaded
- 
+        data = pickle.load(f)
+   #+END_SRC                  
+
+
    #+BEGIN_SRC python :session modeling :exports none :results quite
      X_all = data['X_all'] 
      y_all = data['y_all'] 
@@ -305,10 +293,7 @@ each feature:
      X_test = data['X_test'] 
      y_test  = data['y_test']
    #+END_SRC
- 
-   #+RESULTS:
- 
- 
+
    After an analysis of several algorithms, the details of which can be found [[https://github.com/rortms/Udacity_Machine/blob/master/P2/student_intervention/Final_Report.pdf][here]], we will proceed with
    the binary classification using a DecisionTree classifier and a K-neighbors classifier for reference.
  
@@ -358,13 +343,15 @@ each feature:
          table[classifier]['F1 score training set'] = F1_train/10
          table[classifier]['Prediction time']       = "{:10.4f} s".format(t_test/10)
          table[classifier]['F1 score test set']     = F1_test/10
-         
+
    #+END_SRC
+
  
    #+BEGIN_SRC python :session modeling :exports none
      tabulate(table, headers=["DecisionTreeClassifier", "KNeighborsClassifier"], tablefmt="grid")
    #+END_SRC
- 
+
+
    +-----------------------+--------------------------+------------------------+
    |                       | DecisionTreeClassifier   | KNeighborsClassifier   |
    +=======================+==========================+========================+
@@ -390,26 +377,55 @@ each feature:
      scorer = make_scorer(F1)
      #
      # GridSearch parameters for Tree
-     tree_param = { 'n_estimators' : range(2,7),'criterion': ["entropy", "gini"], 'max_features':["sqrt", "log2"], 'max_depth': range(2,11),
-                    'min_samples_split':range(2,9), 'min_samples_leaf':range(1,9) }
+     tree_param = { 'criterion': ["entropy", "gini"], 'max_features':["sqrt", "log2"], 'random_state': [0],
+                    'max_depth': range(2,11), 'min_samples_split':range(2,9), 'min_samples_leaf':range(1,9) }
      #
      # Gridsearch parameters for KNN
      neigh_param = {'n_neighbors' : [3,5,10,20,25,30,40], 'weights' : ['uniform', 'distance'], 'p':[1,2,3,5,10],
                     'algorithm' : ['ball_tree', 'kd_tree', 'brute']}
+     #
+     gs_table = pd.DataFrame(columns=["DecisionTreeClassifier", "KNeighborsClassifier"], index=["Grid search time (s)", "f1_score Test Set"])
+     #
+     final_params = {"DecisionTreeClassifier": None,  "KNeighborsClassifier": None}
      #
      #Perform grid Search
      def gridIt(clf, params):
          #Grid search folds = 10, for consistency with previous computations
          grid_clf = grid_search.GridSearchCV(clf, params,
                                              scorer, n_jobs=4, cv = 10)
-         print clf.__class__.__name__
-         print "Grid search time:", timeTraining(grid_clf, X_train, y_train)
-         print "Parameters of tuned model: ", grid_clf.best_params_
+         #
+         # Grid time    
+         gs_table[clf.__class__.__name__][0] = timeTraining(grid_clf, X_train, y_train)
+         #
+         # F1 on Test
          y_pred, predict_t = predictAndTime(grid_clf, X_test)
-         print "f1_score and prediction time on X_test, y_test: "
-         print F1(y_test, y_pred), predict_t
-         print '------------------\n'
-         
-     # gridIt(KNeighborsClassifier(), neigh_param)
-     # gridIt(RandomForestClassifier(), tree_param)
+         gs_table[clf.__class__.__name__][1] = F1(y_test, y_pred)
+         #    
+         # "Parameters of tuned model
+         final_params[clf.__class__.__name__] = grid_clf.best_params_
+       
    #+END_SRC
+
+   #+BEGIN_SRC python :session modeling 
+     gridIt(KNeighborsClassifier(), neigh_param)
+   #+END_SRC
+
+   #+BEGIN_SRC python :session modeling 
+     gridIt(DecisionTreeClassifier(), tree_param)   
+   #+END_SRC
+
+   #+BEGIN_SRC python :session modeling
+   tabulate(gs_table, headers=["DecisionTreeClassifier", "KNeighborsClassifier"], tablefmt="grid")
+   #+END_SRC
+
+   #+BEGIN_SRC python :session modeling :exports none
+     # Save Model benchmarks and parameters
+     tuned_m = { 'final_params' : final_params,
+                 'gs_table' : gs_table }
+     with open("./pickled/tuned_m.pkl", 'wb') as f:
+         pickle.dump(tuned_m, f, pickle.HIGHEST_PROTOCOL)
+   #+END_SRC
+
+
+* Analysis
+  
