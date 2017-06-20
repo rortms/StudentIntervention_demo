@@ -3,7 +3,7 @@
 #+OPTIONS: toc:nil 
 #+LATEX_HEADER: \usepackage[margin=0.5in]{geometry}
 # (setq org-export-with-sub-superscripts nil) #eval on scratch to turn off subscripting
-* Obective 
+* Objective 
 The goal of this project is to identify students who might need early intervention. We want to predict whether a given student will pass or fail
 based on information about his life and habits. Therefore we approach this task as a classification problem with two classes, pass and fail.
 
@@ -106,7 +106,7 @@ each feature:
     #+END_SRC
 
 
-    Addiontally, we must transform all categorical features into binary/numeric ones in order to be processed
+    Additionally, we must transform all categorical features into binary/numeric ones in order to be processed
     by subsequent algorithms. Pandas' [[http://pandas.pydata.org/pandas-docs/stable/generated/pandas.get_dummies.html?highlight=get_dummies#pandas.get_dummies][get_dummies]] function will come in handy.
 
     #+BEGIN_SRC python :session wrangle_data :results output
@@ -192,9 +192,9 @@ each feature:
    #+RESULTS:
 
    To identify whether it is appropriate to treat the data under a single model, that is, to identify whether its a manifold of multiple charts or
-   a single chart, we employ a [[http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html][t-sne]] projection. We'll project to 2-dimensions with red labeling failed and blue labeling passing data points.
-   This may or may not reveal some intrinsic clustering relative to our feature of interest 'passed'. It is recommended for t-sne to be fed features
-   scaled to simlar ranges, so this is the first pre-process step. 
+   a single chart, we employ a [[http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html][T-SNE]] projection. We'll project to 2-dimensions with red labeling failed and blue labeling passing data points.
+   This may or may not reveal some intrinsic clustering relative to our feature of interest 'passed'. It is recommended for T-SNE to be fed features
+   scaled to similar ranges, so this is the first pre-process step. 
   
    #+BEGIN_SRC python :session dexplore :results quite
      from sklearn.preprocessing import MinMaxScaler
@@ -274,7 +274,7 @@ each feature:
         return y_pred, (end - start)
 
      #
-     # Return the f1 score for the target values and predictions
+     # Return the F1 score for the target values and predictions
      def F1(target, prediction):
         return f1_score(target.values, prediction, pos_label='yes')
 
@@ -319,7 +319,7 @@ each feature:
      benchmarks = ["Training time",  "F1 score training set","Prediction time", "F1 score test set"]
      table = pd.DataFrame(columns = classifier_names, index = benchmarks)
      #
-     # Fit Classifiers and average the times and f1 scores resulting from KFold (10 folds)
+     # Fit Classifiers and average the times and F1 scores resulting from KFold (10 folds)
      for clf in clfs: 
          classifier   = clf.__class__.__name__
          t_test  = 0.0 
@@ -365,7 +365,7 @@ each feature:
    +-----------------------+--------------------------+------------------------+
  
    The results above show that the tree scores perfectly on the training set and it's outperformed by KNN on the test set,
-   with 0.709 to KNN's .781. The tree is most likely overfitting. We will tune both models with a grid search.
+   with 0.709 to KNN's .781. The tree is most likely over-fitting. We will tune both models with a grid search.
 
 ** Gridsearch Tuning
 
@@ -414,10 +414,6 @@ each feature:
      gridIt(DecisionTreeClassifier(), tree_param)   
    #+END_SRC
 
-   #+BEGIN_SRC python :session modeling
-   tabulate(gs_table, headers=["DecisionTreeClassifier", "KNeighborsClassifier"], tablefmt="grid")
-   #+END_SRC
-
    #+BEGIN_SRC python :session modeling :exports none
      # Save Model benchmarks and parameters
      tuned_m = { 'final_params' : final_params,
@@ -425,7 +421,148 @@ each feature:
      with open("./pickled/tuned_m.pkl", 'wb') as f:
          pickle.dump(tuned_m, f, pickle.HIGHEST_PROTOCOL)
    #+END_SRC
-
+   
 
 * Analysis
+  #+BEGIN_SRC python :session analysis :exports none :results output
+    import numpy as np
+    import pandas as pd
+    from sklearn.metrics import f1_score
+    #
+    import matplotlib.pyplot as plt
+    from tabulate import tabulate
+    #
+    import pickle
+    import time
+    #
+    #
+    # Helper Functions
+    #
+
+    # Return the classifier's training time
+    def timeTraining(clf, X_train, y_train):
+       start = time.time()
+       clf.fit(X_train, y_train)
+       end = time.time()
+       return (end - start)
+
+    #
+    # Return the classifier's predictions and prediction time
+    def predictAndTime(clf, features):
+       start = time.time()
+       y_pred = clf.predict(features)
+       end = time.time()
+       return y_pred, (end - start)
+
+    #
+    # Return the F1 score for the target values and predictions
+    def F1(target, prediction):
+       return f1_score(target.values, prediction, pos_label='yes')
+
+    #
+    # Load Data
+    with open("./pickled/processed_and_split.pickle", 'rb') as f:
+       data = pickle.load(f)
+
+    #
+    # Load Tuned models
+    with open("./pickled/tuned_m.pkl", 'rb') as f:
+        tuned_m = pickle.load(f)
+
+    final_params = tuned_m['final_params']
+    gs_table = tuned_m['gs_table']
+
+    X_all = data['X_all'] 
+    y_all = data['y_all'] 
+    X_train = data['X_train'] 
+    y_train = data['y_train'] 
+    X_test = data['X_test'] 
+    y_test  = data['y_test']
+  #+END_SRC
+
+  #+RESULTS:
+  : Python 2.7.13 | packaged by conda-forge | (default, May  2 2017, 12:48:11) 
+  : [GCC 4.8.2 20140120 (Red Hat 4.8.2-15)] on linux2
+  : Type "help", "copyright", "credits" or "license" for more information.
+  : >>> ... python.el: native completion setup loaded
+
+
+  #+BEGIN_SRC python :session analysis
+  tabulate(gs_table, headers=["DecisionTreeClassifier", "KNeighborsClassifier"], tablefmt="grid")
+  #+END_SRC
+
+  #+RESULTS:
+
+  Here  is the F1 performance on the test set for both classifiers after grid search tuning;
+
+  +----------------------+--------------------------+------------------------+
+  |                      |   DecisionTreeClassifier |   KNeighborsClassifier |
+  +======================+==========================+========================+
+  | Grid search time (s) |                59.2091   |              12.2915   |
+  +----------------------+--------------------------+------------------------+
+  | f1_score Test Set    |                 0.789116 |               0.786667 |
+  +----------------------+--------------------------+------------------------+ 
+
+  #+BEGIN_SRC python :session analysis :exports none
+   bef = 0.708666825808,0.780716646689
+   aft = 0.789116, 0.786667
+
+   (aft[0]-bef[0])/aft[0] * 100, (aft[1]-bef[1])/aft[1] * 100
+  #+END_SRC
+  #+RESULTS:
+   | 10.194847676640702 | 0.7564005241099503 |
   
+  So we have a decent 10.2 % percentage increase in performance for the tree classifier and a mere 0.76% percent
+  increase for KNN. Notice also that the decision tree is ~5 times more costly to train, taking a full minute, to 
+  KNN's 12 seconds. In the end however, they are virtually on par in terms of F1 score on the test set. We see that
+  KNN will give good out of the box performance without much tuning. But in the present context the Decisiontree
+  has particular advantages. Before we manipulated it, the data was strongly categorical. Even age for example,
+  can basically be thought of as buckets between 15 and 22. Because of this, the structure of the data is modeled 
+  well with a decision tree function, which can literally be visually inspected to glean insights from our model.
+  We proceed to generate this visualization next. 
+
+   
+   
+  #+BEGIN_SRC python :session analysis :exports code
+    from sklearn import tree
+    import pydotplus
+
+    t_p = tuned_m['final_params']["DecisionTreeClassifier"]
+    tree_clf = tree.DecisionTreeClassifier(min_samples_leaf=3,
+                                           max_features='sqrt',
+                                           random_state=0,
+                                           criterion='gini',
+                                           min_samples_split=2,
+                                           max_depth=3)
+    tree_clf.fit(X_train,y_train)
+    f1_score(tree_clf.predict(X_test), y_test, pos_label='yes')
+    #
+    # Make tree graphic
+    tree_dot_data = tree.export_graphviz(tree_clf, out_file=None,
+                                         feature_names=X_train.columns,
+                                         class_names=['fail','pass'],
+                                         filled=True, rounded=True,
+                                         special_characters=True)
+    graph = pydotplus.graph_from_dot_data(tree_dot_data)
+    graph.write_png("./figures/student_tree.png")
+
+
+  #+END_SRC
+
+  [[./figures/student_tree.png]]
+
+  Here we have the model's actual decision function in tree form. It is of depth 3, as we defined it. 3 being the optimal depth we
+  found during the grid search tuning phase. The root displays the binary feature 'higher', that is, whether the student's
+  intention is to move on to higher education or not. Most students in the dataset intend to pursue higher education, 286 to just
+  14 who don't. But the model strongly predicts failure for those who don't, only 3 of those 14 fall in the 'pass' leaf. For the
+  286 students who intend to pursue higher education, we see that for the 184 who keep their 'goout' moderate (i.e. <=3.5) the model
+  basically predicts that they will all pass. For the remaining 102 students who's 'goout' > 3.5, the feature that predicts success
+  is number of passed class failures. Basically, only if they have not failed a class in the past, 'failure' < 0.5, does the model 
+  predict they'll pass. 
+  Even though decision trees provide this convenient visualization for inspecting the relationship between the data and the model's 
+  predictions, they tend to be unstable. This means that small variations in the data can result in completely different trees. This
+  must be taken into consideration when using the visualization to interpret the model as we just did, since a decision tree based on
+  completely different feature relationships could perform equally well. This problem however, can be mitigated with ensemble 'averaging'
+  methods.
+  
+

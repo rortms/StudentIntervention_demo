@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Supervised Learning: Building a Student Intervention System</title>
-<!-- 2017-06-18 Sun 20:25 -->
+<!-- 2017-06-20 Tue 02:45 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Robert M Salom" />
@@ -139,7 +139,7 @@ for the JavaScript code in this tag.
 <div id="content">
 <h1 class="title">Supervised Learning: Building a Student Intervention System</h1>
 <div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> Obective</h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> Objective</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The goal of this project is to identify students who might need early intervention. We want to predict whether a given student will pass or fail
@@ -343,7 +343,7 @@ Now we will separate the data into the feature columns and our prediction target
 
 
 <p>
-Addiontally, we must transform all categorical features into binary/numeric ones in order to be processed
+Additionally, we must transform all categorical features into binary/numeric ones in order to be processed
 by subsequent algorithms. Pandas&rsquo; <a href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.get_dummies.html?highlight=get_dummies#pandas.get_dummies">get_dummies</a> function will come in handy.
 </p>
 
@@ -401,9 +401,9 @@ train_test_split function to perform the data split.
 <div class="outline-text-3" id="text-2-3">
 <p>
 To identify whether it is appropriate to treat the data under a single model, that is, to identify whether its a manifold of multiple charts or
-a single chart, we employ a <a href="http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">t-sne</a> projection. We&rsquo;ll project to 2-dimensions with red labeling failed and blue labeling passing data points.
-This may or may not reveal some intrinsic clustering relative to our feature of interest &lsquo;passed&rsquo;. It is recommended for t-sne to be fed features
-scaled to simlar ranges, so this is the first pre-process step. 
+a single chart, we employ a <a href="http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">T-SNE</a> projection. We&rsquo;ll project to 2-dimensions with red labeling failed and blue labeling passing data points.
+This may or may not reveal some intrinsic clustering relative to our feature of interest &lsquo;passed&rsquo;. It is recommended for T-SNE to be fed features
+scaled to similar ranges, so this is the first pre-process step. 
 </p>
 
 <div class="org-src-container">
@@ -502,7 +502,7 @@ perform out of the box.
 <span style="color: #BA36A5;">benchmarks</span> = [<span style="color: #008000;">"Training time"</span>,  <span style="color: #008000;">"F1 score training set"</span>,<span style="color: #008000;">"Prediction time"</span>, <span style="color: #008000;">"F1 score test set"</span>]
 <span style="color: #BA36A5;">table</span> = pd.DataFrame(columns = classifier_names, index = benchmarks)
 <span style="color: #8D8D84;">#</span>
-<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Fit Classifiers and average the times and f1 scores resulting from KFold (10 folds)</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Fit Classifiers and average the times and F1 scores resulting from KFold (10 folds)</span>
 <span style="color: #0000FF;">for</span> clf <span style="color: #0000FF;">in</span> clfs: 
     <span style="color: #BA36A5;">classifier</span>   = clf.__class__.<span style="color: #006FE0;">__name__</span>
     <span style="color: #BA36A5;">t_test</span>  = 0.0 
@@ -591,7 +591,7 @@ perform out of the box.
 
 <p>
 The results above show that the tree scores perfectly on the training set and it&rsquo;s outperformed by KNN on the test set,
-with 0.709 to KNN&rsquo;s .781. The tree is most likely overfitting. We will tune both models with a grid search.
+with 0.709 to KNN&rsquo;s .781. The tree is most likely over-fitting. We will tune both models with a grid search.
 </p>
 </div>
 </div>
@@ -648,22 +648,121 @@ with 0.709 to KNN&rsquo;s .781. The tree is most likely overfitting. We will tun
 <pre class="src src-python">gridIt(DecisionTreeClassifier(), tree_param)
 </pre>
 </div>
-
-<pre class="example">
-+----------------------+--------------------------+------------------------+
-|                      |   DecisionTreeClassifier |   KNeighborsClassifier |
-+======================+==========================+========================+
-| Grid search time (s) |                59.2091   |              12.2915   |
-+----------------------+--------------------------+------------------------+
-| f1_score Test Set    |                 0.789116 |               0.786667 |
-+----------------------+--------------------------+------------------------+
-</pre>
 </div>
 </div>
 </div>
 
 <div id="outline-container-sec-4" class="outline-2">
 <h2 id="sec-4"><span class="section-number-2">4</span> Analysis</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+
+<pre class="src src-python">tabulate(gs_table, headers=[<span style="color: #008000;">"DecisionTreeClassifier"</span>, <span style="color: #008000;">"KNeighborsClassifier"</span>], tablefmt=<span style="color: #008000;">"grid"</span>)
+</pre>
+</div>
+
+<p>
+Here  is the F1 performance on the test set for both classifiers after grid search tuning;
+</p>
+
+<!-- This HTML table template is generated by emacs 25.1.1 -->
+<table border="1">
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;DecisionTreeClassifier&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;KNeighborsClassifier&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;Grid&nbsp;search&nbsp;time&nbsp;(s)&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;59.2091&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.2915&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;f1_score&nbsp;Test&nbsp;Set&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.789116&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.786667&nbsp;
+    </td>
+  </tr>
+</table>
+
+<p>
+So we have a decent 10.2 % percentage increase in performance for the tree classifier and a mere 0.76% percent
+increase for KNN. Notice also that the decision tree is ~5 times more costly to train, taking a full minute, to 
+KNN&rsquo;s 12 seconds. In the end however, they are virtually on par in terms of F1 score on the test set. We see that
+KNN will give good out of the box performance without much tuning. But in the present context the Decisiontree
+has particular advantages. Before we manipulated it, the data was strongly categorical. Even age for example,
+can basically be thought of as buckets between 15 and 22. Because of this, the structure of the data is modeled 
+well with a decision tree function, which can literally be visually inspected to glean insights from our model.
+We proceed to generate this visualization next. 
+</p>
+
+
+
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #0000FF;">from</span> sklearn <span style="color: #0000FF;">import</span> tree
+<span style="color: #0000FF;">import</span> pydotplus
+
+<span style="color: #BA36A5;">t_p</span> = tuned_m[<span style="color: #008000;">'final_params'</span>][<span style="color: #008000;">"DecisionTreeClassifier"</span>]
+<span style="color: #BA36A5;">tree_clf</span> = tree.DecisionTreeClassifier(min_samples_leaf=3,
+                                       max_features=<span style="color: #008000;">'sqrt'</span>,
+                                       random_state=0,
+                                       criterion=<span style="color: #008000;">'gini'</span>,
+                                       min_samples_split=2,
+                                       max_depth=3)
+tree_clf.fit(X_train,y_train)
+f1_score(tree_clf.predict(X_test), y_test, pos_label=<span style="color: #008000;">'yes'</span>)
+<span style="color: #8D8D84;">#</span>
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Make tree graphic</span>
+<span style="color: #BA36A5;">tree_dot_data</span> = tree.export_graphviz(tree_clf, out_file=<span style="color: #D0372D;">None</span>,
+                                     feature_names=X_train.columns,
+                                     class_names=[<span style="color: #008000;">'fail'</span>,<span style="color: #008000;">'pass'</span>],
+                                     filled=<span style="color: #D0372D;">True</span>, rounded=<span style="color: #D0372D;">True</span>,
+                                     special_characters=<span style="color: #D0372D;">True</span>)
+<span style="color: #BA36A5;">graph</span> = pydotplus.graph_from_dot_data(tree_dot_data)
+graph.write_png(<span style="color: #008000;">"./figures/student_tree.png"</span>)
+</pre>
+</div>
+
+
+<div class="figure">
+<p><img src="./figures/student_tree.png" alt="student_tree.png" />
+</p>
+</div>
+
+<p>
+Here we have the model&rsquo;s actual decision function in tree form. It is of depth 3, as we defined it. 3 being the optimal depth we
+found during the grid search tuning phase. The root displays the binary feature &lsquo;higher&rsquo;, that is, whether the student&rsquo;s
+intention is to move on to higher education or not. Most students in the dataset intend to pursue higher education, 286 to just
+14 who don&rsquo;t. But the model strongly predicts failure for those who don&rsquo;t, only 3 of those 14 fall in the &lsquo;pass&rsquo; leaf. For the
+286 students who intend to pursue higher education, we see that for the 184 who keep their &lsquo;goout&rsquo; moderate (i.e. &lt;=3.5) the model
+basically predicts that they will all pass. For the remaining 102 students who&rsquo;s &lsquo;goout&rsquo; &gt; 3.5, the feature that predicts success
+is number of passed class failures. Basically, only if they have not failed a class in the past, &lsquo;failure&rsquo; &lt; 0.5, does the model 
+predict they&rsquo;ll pass. 
+Even though decision trees provide this convenient visualization for inspecting the relationship between the data and the model&rsquo;s 
+predictions, they tend to be unstable. This means that small variations in the data can result in completely different trees. This
+must be taken into consideration when using the visualization to interpret the model as we just did, since a decision tree based on
+completely different feature relationships could perform equally well. This problem however, can be mitigated with ensemble &lsquo;averaging&rsquo;
+methods.
+</p>
+</div>
 </div>
 </div>
 </body>
